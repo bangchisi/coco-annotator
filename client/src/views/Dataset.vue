@@ -220,6 +220,16 @@
 
         <button
           type="button"
+          class="btn btn-primary btn-block"
+          @click="uploadImage"
+        >
+          <div>
+            Upload Image
+          </div>
+        </button>
+
+        <button
+          type="button"
           class="btn btn-secondary btn-block"
           @click="createScanTask"
         >
@@ -473,6 +483,7 @@ import PanelDropdown from "@/components/PanelInputDropdown"
 import JQuery from "jquery";
 import TagsInput from "@/components/TagsInput";
 
+import axios from 'axios'
 import { mapMutations } from "vuex";
 
 let $ = JQuery;
@@ -566,6 +577,39 @@ export default {
       Dataset.generate(this.dataset.id, {
         keywords: [this.keyword],
         limit: this.generateLimit
+      });
+    },
+    uploadImage() {
+      let input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.multiple = true;
+      input.click();
+
+      input.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+
+        const formData = new FormData();
+        formData.append('dataset_id', this.dataset.id);
+        formData.append('image', file);
+
+        const process = 'Uploading image';
+
+        this.addProcess(process);
+        axios
+          .post('/api/image/', formData)
+          .then(() => {
+            // * reload images
+            this.updatePage();
+            this.axiosReqestSuccess('Uploading Image', 'Successfully uploaded');
+          })
+          .catch((error) => {
+            this.axiosReqestError('Uploading Image', error.response.data.message);
+          })
+          .finally(() => {
+            input.remove();
+            this.removeProcess(process);
+          });
       });
     },
     updatePage(page) {

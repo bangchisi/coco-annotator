@@ -97,10 +97,12 @@ class Images(Resource):
         image.close()
         pil_image.close()
         try:
-            db_image = ImageModel.create_from_path(path, dataset_id).save()
+            image_model = ImageModel.create_from_path(path, dataset_id)
+            image_model.save()
+            image_model.thumbnail()
         except NotUniqueError:
-            db_image = ImageModel.objects.get(path=path)
-        return db_image.id
+            image_model = ImageModel.objects.get(path=path)
+        return image_model.id
 
 
 @api.route('/<int:image_id>')
